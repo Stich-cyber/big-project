@@ -8,21 +8,90 @@
       href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf/notyf.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/notyf/notyf.min.js"></script>
+
     <link rel="stylesheet" href="./main.css" />
   </head>
   <body>
     <canvas id="canvas"></canvas>
     <div class="content">
       <form>
-        <input class="inp1" required placeholder="pls enter text" type="text" />
-        <input class="inp2" required placeholder="pls enter text" type="text" />
-        <select>
-          <option value="1">Sort by</option>
-          <option value="2">A-Z</option>
-          <option value="3">Z-A</option>
-        </select>
+        <input
+          class="inp1"
+          required
+          placeholder="enter user name"
+          type="text"
+        />
+        <input class="inp2" required placeholder="enter number" type="text" />
+        <div class="drop-down">
+          <button
+            id="dropdownDefaultButton"
+            data-dropdown-toggle="dropdown"
+            class="select"
+            type="button"
+          >
+            Details
+            <svg
+              class="w-2.5 h-2.5 ms-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 4 4 4-4"
+              />
+            </svg>
+          </button>
+          <div
+            id="dropdown"
+            class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-44 bg-[#343434]"
+          >
+            <ul
+              class="py-2 text-sm text-gray-200"
+              aria-labelledby="dropdownDefaultButton"
+            >
+              <li>
+                <div class="select11">
+                  <select id="dropdownSelect">
+                    <option value="">Sort</option>
+                    <option value="az">A-Z</option>
+                    <option value="za">Z-A</option>
+                    <option value="Search">Search</option>
+                  </select>
+                  <input
+                    type="text"
+                    id="search"
+                    placeholder="enter text"
+                    class="hidden-input"
+                  />
+                </div>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  id="hider"
+                  class="block px-4 py-2 hover:bg-[#4a4a4a]"
+                  >Hide Todo List</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
         <button class="btn1" type="submit">Add Contact</button>
       </form>
+      <div class="wrapper"></div>
+    </div>
+    <div class="card-invis">
+      <button class="invis">Back to ToDo List</button>
     </div>
     <script src="./main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>

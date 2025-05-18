@@ -91,9 +91,124 @@ function changeBtn1() {
   if (inp1.value.length >= 1 && inp2.value.length >= 1) {
     btn1.style.backgroundColor = "#5ad55a";
   } else {
-    btn1.style.backgroundColor = "#d55a5a"; 
+    btn1.style.backgroundColor = "#d55a5a";
   }
 }
 inp1.addEventListener("input", changeBtn1);
 inp2.addEventListener("input", changeBtn1);
 changeBtn1();
+let hider = document.querySelector("#hider");
+if (hider) {
+  hider.addEventListener("click", () => {
+    document.querySelector(".content").style.display = "none";
+    let cards = document.querySelectorAll(".card-invis");
+    for (card of cards) {
+      card.style.display = "flex";
+    }
+  });
+}
+let cards = document.querySelectorAll(".card-invis");
+for (card of cards) {
+  card.addEventListener("click", () => {
+    document.querySelector(".content").style.display = "block";
+    for (let otherCard of cards) {
+      otherCard.style.display = "none";
+    }
+  });
+}
+let dropdownSelect = document.getElementById("dropdownSelect");
+let customInput = document.getElementById("search");
+let deleteButtons = document.querySelectorAll(".delete");
+
+dropdownSelect.addEventListener("change", () => {
+  if (dropdownSelect.value === "Search") {
+    customInput.style.display = "block";
+  } else {
+    customInput.style.display = "none";
+  }
+});
+async function item() {
+  try {
+    let response = await fetch(
+      "https://68297b406075e87073a695a6.mockapi.io/api/contact"
+    );
+    let data = await response.json();
+    const wrapper = document.querySelector(".wrapper");
+    data.forEach((item) => {
+      let card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `
+        <img src="${item.img}" alt="Car Image" />
+        <div class="info">
+          <h2>${item.firstName}</h2>
+          <p>${item.number}</p>
+        </div>
+        <div class="actions">
+          <button class="edit">Edit</button>
+          <button class="delete">Delete</button>
+        </div>
+      `;
+      card.querySelector(".delete").addEventListener("click", () => {
+        deleteFuction(item.id);
+      });
+      wrapper.append(card);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+item();
+function postUser(firstName, number) {
+  try {
+    let res1 = fetch(
+      "https://68297b406075e87073a695a6.mockapi.io/api/contact",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: firstName,
+          number: number,
+        }),
+      }
+    );
+    let data1 = res1.json();
+  } catch (error) {
+    console.log(error);
+  }
+}
+let form = document.querySelector("form");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  postUser(inp1.value, inp2.value);
+  inp1.value = "";
+  inp2.value = "";
+  document.querySelector(".wrapper").innerHTML = "";
+  fetchCars();
+  btn1.style.backgroundColor = "#d55a5a";
+  console.error(error);
+});
+function deleteFuction(id) {
+  fetch(`https://68297b406075e87073a695a6.mockapi.io/api/contact/${id}`, {
+    method: "DELETE",
+  })
+    .then((response1) => {
+      if (response1.ok == true) {
+        const notyf = new Notyf({
+          duration: 3000,
+          ripple: true,
+          position: { x: "right", y: "top" },
+        });
+        notyf.success("Deleted successfully");
+      } else {
+        const notyf = new Notyf({
+          duration: 3000,
+          ripple: true,
+          position: { x: "right", y: "top" },
+        });
+        notyf.error("delete failed");
+      }
+    })
+    .catch((error) => console.log(error));
+}
