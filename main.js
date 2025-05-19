@@ -136,16 +136,16 @@ let hider = document.querySelector("#hider");
 if (hider) {
   hider.addEventListener("click", () => {
     document.querySelector(".content").style.display = "none";
-    document.querySelectorAll(".card-invis").forEach((card) => {
+    document.querySelectorAll(".card-invis").map((card) => {
       card.style.display = "flex";
     });
   });
 }
 
-document.querySelectorAll(".card-invis").forEach((card) => {
+document.querySelectorAll(".card-invis").map((card) => {
   card.addEventListener("click", () => {
     document.querySelector(".content").style.display = "block";
-    document.querySelectorAll(".card-invis").forEach((otherCard) => {
+    document.querySelectorAll(".card-invis").map((otherCard) => {
       otherCard.style.display = "none";
     });
   });
@@ -158,7 +158,7 @@ async function fetchContacts() {
     let data = await response.json();
     renderContacts(data);
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    console.error(error);
     showNotification("Failed to load contacts", "error");
   }
 }
@@ -167,13 +167,11 @@ function renderContacts(contacts) {
   let wrapper = document.querySelector(".wrapper");
   wrapper.innerHTML = "";
 
-  contacts.forEach((contact) => {
+  contacts.map((contact) => {
     let card = document.createElement("div");
     card.classList.add("card");
     card.innerHTML = `
-      <img src="${
-        contact.img || "https://via.placeholder.com/150"
-      }" alt="Contact Image" />
+      <img src="${contact.img}" alt="Contact Image" />
       <div class="info">
         <h2>${contact.firstName}</h2>
         <p>${contact.number}</p>
@@ -188,7 +186,7 @@ function renderContacts(contacts) {
       deleteContact(contact.id);
     });
 
-    wrapper.appendChild(card);
+    wrapper.append(card);
   });
 }
 
@@ -204,7 +202,6 @@ async function postContact(firstName, number) {
         body: JSON.stringify({
           firstName,
           number,
-          img: "https://via.placeholder.com/150",
         }),
       }
     );
@@ -216,7 +213,7 @@ async function postContact(firstName, number) {
       showNotification("Failed to add contact", "error");
     }
   } catch (error) {
-    console.error("Error adding contact:", error);
+    console.error(error);
     showNotification("Error adding contact", "error");
   }
 }
@@ -237,7 +234,7 @@ async function deleteContact(id) {
       showNotification("Failed to delete contact", "error");
     }
   } catch (error) {
-    console.error("Error deleting contact:", error);
+    console.error(error);
     showNotification("Error deleting contact", "error");
   }
 }
@@ -246,7 +243,6 @@ document.querySelector("form").addEventListener("submit", async (e) => {
   await postContact(inp1.value, inp2.value);
   inp1.value = "";
   inp2.value = "";
-  btn1.style.backgroundColor = "#d55a5a";
 });
 document.getElementById("search").addEventListener("input", (e) => {
   let searchTerm = e.target.value.toLowerCase();
@@ -263,28 +259,26 @@ document.getElementById("search").addEventListener("input", (e) => {
     }
   });
 });
-document
-  .getElementById("dropdownSelect")
-  .addEventListener("change",  (e) => {
-    let sortValue = e.target.value;
-    try {
-      let response =  fetch(
-        "https://68297b406075e87073a695a6.mockapi.io/api/contact"
-      );
-      let contacts =  response.json();
+document.getElementById("dropdownSelect").addEventListener("change", (e) => {
+  let sortValue = e.target.value;
+  try {
+    let response = fetch(
+      "https://68297b406075e87073a695a6.mockapi.io/api/contact"
+    );
+    let contacts = response.json();
 
-      if (sortValue === "az") {
-        contacts.sort((a, b) => a.firstName.localeCompare(b.firstName));
-      } else if (sortValue === "za") {
-        contacts.sort((a, b) => b.firstName.localeCompare(a.firstName));
-      }
-
-      renderContacts(contacts);
-    } catch (error) {
-      console.error("Error sorting contacts:", error);
-      showNotification("Error sorting contacts", "error");
+    if (sortValue === "az") {
+      contacts.sort((a, b) => a.firstName.localeCompare(b.firstName));
+    } else if (sortValue === "za") {
+      contacts.sort((a, b) => b.firstName.localeCompare(a.firstName));
     }
-  });
+
+    renderContacts(contacts);
+  } catch (error) {
+    console.error("Error sorting contacts:", error);
+    showNotification("Error sorting contacts", "error");
+  }
+});
 function showNotification(message, type) {
   const notyf = new Notyf({
     duration: 3000,
