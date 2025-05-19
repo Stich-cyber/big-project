@@ -65,15 +65,16 @@
                     <option value="">Sort</option>
                     <option value="az">A-Z</option>
                     <option value="za">Z-A</option>
-                    <option value="Search">Search</option>
                   </select>
-                  <input
-                    type="text"
-                    id="search"
-                    placeholder="enter text"
-                    class="hidden-input"
-                  />
                 </div>
+              </li>
+              <li>
+                <input
+                  type="text"
+                  id="search"
+                  placeholder="enter text"
+                  class="hidden-input"
+                />
               </li>
               <li>
                 <a
@@ -82,6 +83,16 @@
                   class="block px-4 py-2 hover:bg-[#4a4a4a]"
                   >Hide Todo List</a
                 >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  id="off-on"
+                  class="block px-4 py-2 hover:bg-[#4a4a4a]"
+                  onclick="toggle()"
+                >
+                  Off effects
+                </a>
               </li>
             </ul>
           </div>

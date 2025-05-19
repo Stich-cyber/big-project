@@ -2,9 +2,8 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
 const colors = [
-  "#white",
-  "gray",
   "#343434",
   "#36454F",
   "#2a3439",
@@ -18,6 +17,7 @@ const colors = [
   "#2D383A",
   "#3F3F46",
 ];
+
 let particles = [];
 let mouse = {
   x: null,
@@ -25,7 +25,11 @@ let mouse = {
   radius: 80,
   isDown: false,
 };
+let effectsEnabled = true;
+let animationRunning = true;
 window.addEventListener("mousemove", (event) => {
+  if (!effectsEnabled) return;
+
   mouse.x = event.x;
   mouse.y = event.y;
   let count = mouse.isDown ? 15 : 5;
@@ -33,9 +37,11 @@ window.addEventListener("mousemove", (event) => {
     particles.push(new Particle(true));
   }
 });
+
 window.addEventListener("mousedown", () => {
   mouse.isDown = true;
 });
+
 window.addEventListener("mouseup", () => {
   mouse.isDown = false;
 });
@@ -51,6 +57,7 @@ class Particle {
     this.velocityX = Math.cos(this.angle) * this.speed;
     this.velocityY = Math.sin(this.angle) * this.speed;
   }
+
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -58,6 +65,7 @@ class Particle {
     ctx.fillStyle = this.color;
     ctx.fill();
   }
+
   update() {
     this.x += this.velocityX;
     this.y += this.velocityY;
@@ -68,6 +76,11 @@ class Particle {
   }
 }
 function animate() {
+  if (!effectsEnabled) {
+    animationRunning = false;
+    return;
+  }
+
   ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   for (let i = 0; i < particles.length; i++) {
@@ -79,9 +92,30 @@ function animate() {
   }
   requestAnimationFrame(animate);
 }
+function toggle() {
+  effectsEnabled = !effectsEnabled;
+  let offOnButton = document.getElementById("off-on");
+
+  if (effectsEnabled) {
+    offOnButton.textContent = "Off effects";
+    if (!animationRunning) {
+      animationRunning = true;
+      animate();
+    }
+  } else {
+    offOnButton.textContent = "On effects";
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    particles = [];
+  }
+}
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  if (!effectsEnabled) {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
 });
 animate();
 let btn1 = document.querySelector(".btn1");
@@ -94,6 +128,7 @@ function changeBtn1() {
     btn1.style.backgroundColor = "#d55a5a";
   }
 }
+
 inp1.addEventListener("input", changeBtn1);
 inp2.addEventListener("input", changeBtn1);
 changeBtn1();
@@ -101,66 +136,65 @@ let hider = document.querySelector("#hider");
 if (hider) {
   hider.addEventListener("click", () => {
     document.querySelector(".content").style.display = "none";
-    let cards = document.querySelectorAll(".card-invis");
-    for (card of cards) {
+    document.querySelectorAll(".card-invis").forEach((card) => {
       card.style.display = "flex";
-    }
+    });
   });
 }
-let cards = document.querySelectorAll(".card-invis");
-for (card of cards) {
+
+document.querySelectorAll(".card-invis").forEach((card) => {
   card.addEventListener("click", () => {
     document.querySelector(".content").style.display = "block";
-    for (let otherCard of cards) {
+    document.querySelectorAll(".card-invis").forEach((otherCard) => {
       otherCard.style.display = "none";
-    }
+    });
   });
-}
-let dropdownSelect = document.getElementById("dropdownSelect");
-let customInput = document.getElementById("search");
-let deleteButtons = document.querySelectorAll(".delete");
-
-dropdownSelect.addEventListener("change", () => {
-  if (dropdownSelect.value === "Search") {
-    customInput.style.display = "block";
-  } else {
-    customInput.style.display = "none";
-  }
 });
-async function item() {
+async function fetchContacts() {
   try {
     let response = await fetch(
       "https://68297b406075e87073a695a6.mockapi.io/api/contact"
     );
     let data = await response.json();
-    const wrapper = document.querySelector(".wrapper");
-    data.forEach((item) => {
-      let card = document.createElement("div");
-      card.classList.add("card");
-      card.innerHTML = `
-        <img src="${item.img}" alt="Car Image" />
-        <div class="info">
-          <h2>${item.firstName}</h2>
-          <p>${item.number}</p>
-        </div>
-        <div class="actions">
-          <button class="edit">Edit</button>
-          <button class="delete">Delete</button>
-        </div>
-      `;
-      card.querySelector(".delete").addEventListener("click", () => {
-        deleteFuction(item.id);
-      });
-      wrapper.append(card);
-    });
+    renderContacts(data);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching contacts:", error);
+    showNotification("Failed to load contacts", "error");
   }
 }
-item();
-function postUser(firstName, number) {
+
+function renderContacts(contacts) {
+  let wrapper = document.querySelector(".wrapper");
+  wrapper.innerHTML = "";
+
+  contacts.forEach((contact) => {
+    let card = document.createElement("div");
+    card.classList.add("card");
+    card.innerHTML = `
+      <img src="${
+        contact.img || "https://via.placeholder.com/150"
+      }" alt="Contact Image" />
+      <div class="info">
+        <h2>${contact.firstName}</h2>
+        <p>${contact.number}</p>
+      </div>
+      <div class="actions">
+        <button class="edit">Edit</button>
+        <button class="delete">Delete</button>
+      </div>
+    `;
+
+    card.querySelector(".delete").addEventListener("click", () => {
+      deleteContact(contact.id);
+    });
+
+    wrapper.appendChild(card);
+  });
+}
+
+async function postContact(firstName, number) {
   try {
-    let res1 = fetch(
+    let response = await fetch(
       "https://68297b406075e87073a695a6.mockapi.io/api/contact",
       {
         method: "POST",
@@ -168,47 +202,100 @@ function postUser(firstName, number) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firstName: firstName,
-          number: number,
+          firstName,
+          number,
+          img: "https://via.placeholder.com/150",
         }),
       }
     );
-    let data1 = res1.json();
+
+    if (response.ok) {
+      showNotification("Contact added successfully", "success");
+      fetchContacts();
+    } else {
+      showNotification("Failed to add contact", "error");
+    }
   } catch (error) {
-    console.log(error);
+    console.error("Error adding contact:", error);
+    showNotification("Error adding contact", "error");
   }
 }
-let form = document.querySelector("form");
-form.addEventListener("submit", async (e) => {
+
+async function deleteContact(id) {
+  try {
+    let response = await fetch(
+      `https://68297b406075e87073a695a6.mockapi.io/api/contact/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (response.ok) {
+      showNotification("Contact deleted successfully", "success");
+      fetchContacts();
+    } else {
+      showNotification("Failed to delete contact", "error");
+    }
+  } catch (error) {
+    console.error("Error deleting contact:", error);
+    showNotification("Error deleting contact", "error");
+  }
+}
+document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  postUser(inp1.value, inp2.value);
+  await postContact(inp1.value, inp2.value);
   inp1.value = "";
   inp2.value = "";
-  document.querySelector(".wrapper").innerHTML = "";
-  fetchCars();
   btn1.style.backgroundColor = "#d55a5a";
-  console.error(error);
 });
-function deleteFuction(id) {
-  fetch(`https://68297b406075e87073a695a6.mockapi.io/api/contact/${id}`, {
-    method: "DELETE",
-  })
-    .then((response1) => {
-      if (response1.ok == true) {
-        const notyf = new Notyf({
-          duration: 3000,
-          ripple: true,
-          position: { x: "right", y: "top" },
-        });
-        notyf.success("Deleted successfully");
-      } else {
-        const notyf = new Notyf({
-          duration: 3000,
-          ripple: true,
-          position: { x: "right", y: "top" },
-        });
-        notyf.error("delete failed");
+document.getElementById("search").addEventListener("input", (e) => {
+  let searchTerm = e.target.value.toLowerCase();
+  let cards = document.querySelectorAll(".card");
+
+  cards.forEach((card) => {
+    let name = card.querySelector("h2").textContent.toLowerCase();
+    let number = card.querySelector("p").textContent.toLowerCase();
+
+    if (name.includes(searchTerm) || number.includes(searchTerm)) {
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+});
+document
+  .getElementById("dropdownSelect")
+  .addEventListener("change",  (e) => {
+    let sortValue = e.target.value;
+    try {
+      let response =  fetch(
+        "https://68297b406075e87073a695a6.mockapi.io/api/contact"
+      );
+      let contacts =  response.json();
+
+      if (sortValue === "az") {
+        contacts.sort((a, b) => a.firstName.localeCompare(b.firstName));
+      } else if (sortValue === "za") {
+        contacts.sort((a, b) => b.firstName.localeCompare(a.firstName));
       }
-    })
-    .catch((error) => console.log(error));
+
+      renderContacts(contacts);
+    } catch (error) {
+      console.error("Error sorting contacts:", error);
+      showNotification("Error sorting contacts", "error");
+    }
+  });
+function showNotification(message, type) {
+  const notyf = new Notyf({
+    duration: 3000,
+    ripple: true,
+    position: { x: "right", y: "top" },
+  });
+
+  if (type === "success") {
+    notyf.success(message);
+  } else {
+    notyf.error(message);
+  }
 }
+fetchContacts();
