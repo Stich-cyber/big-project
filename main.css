@@ -216,19 +216,7 @@ select {
   margin: 0 auto;
   background-color: #202020;
 }
-.invis {
-  padding: 10px;
-  background-color: #343434;
-  color: white;
-  border: none;
-  border-radius: 8px;
-}
-.card-invis {
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-#search { 
+#search {
   margin-top: 10px;
   padding: 7px 5px;
   border-radius: 8px;
@@ -331,6 +319,19 @@ select {
 
 .card .actions .delete:hover {
   background-color: #e57373;
+}
+.card-invis {
+  display: none;
+  left: 45%;
+  position: absolute;
+  top: 45%;
+}
+.invis {
+  padding: 10px;
+  background-color: #343434;
+  color: white;
+  border: none;
+  border-radius: 8px;
 }
 .content::-webkit-scrollbar {
   display: none;

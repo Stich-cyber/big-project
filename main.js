@@ -27,9 +27,9 @@ let mouse = {
 };
 let effectsEnabled = true;
 let animationRunning = true;
+
 window.addEventListener("mousemove", (event) => {
   if (!effectsEnabled) return;
-
   mouse.x = event.x;
   mouse.y = event.y;
   let count = mouse.isDown ? 15 : 5;
@@ -45,6 +45,7 @@ window.addEventListener("mousedown", () => {
 window.addEventListener("mouseup", () => {
   mouse.isDown = false;
 });
+
 class Particle {
   constructor(clicked = false) {
     this.x = mouse.x;
@@ -57,7 +58,6 @@ class Particle {
     this.velocityX = Math.cos(this.angle) * this.speed;
     this.velocityY = Math.sin(this.angle) * this.speed;
   }
-
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -65,7 +65,6 @@ class Particle {
     ctx.fillStyle = this.color;
     ctx.fill();
   }
-
   update() {
     this.x += this.velocityX;
     this.y += this.velocityY;
@@ -75,12 +74,12 @@ class Particle {
     this.draw();
   }
 }
+
 function animate() {
   if (!effectsEnabled) {
     animationRunning = false;
     return;
   }
-
   ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   for (let i = 0; i < particles.length; i++) {
@@ -92,6 +91,7 @@ function animate() {
   }
   requestAnimationFrame(animate);
 }
+
 function toggle() {
   effectsEnabled = !effectsEnabled;
   let offOnButton = document.getElementById("off-on");
@@ -109,6 +109,7 @@ function toggle() {
     particles = [];
   }
 }
+
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -117,10 +118,13 @@ window.addEventListener("resize", () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 });
+
 animate();
+
 let btn1 = document.querySelector(".btn1");
 let inp1 = document.querySelector(".inp1");
 let inp2 = document.querySelector(".inp2");
+
 function changeBtn1() {
   if (inp1.value.length >= 1 && inp2.value.length >= 1) {
     btn1.style.backgroundColor = "#5ad55a";
@@ -132,24 +136,17 @@ function changeBtn1() {
 inp1.addEventListener("input", changeBtn1);
 inp2.addEventListener("input", changeBtn1);
 changeBtn1();
-let hider = document.querySelector("#hider");
-if (hider) {
-  hider.addEventListener("click", () => {
-    document.querySelector(".content").style.display = "none";
-    document.querySelectorAll(".card-invis").map((card) => {
-      card.style.display = "flex";
-    });
-  });
-}
 
-document.querySelectorAll(".card-invis").map((card) => {
-  card.addEventListener("click", () => {
-    document.querySelector(".content").style.display = "block";
-    document.querySelectorAll(".card-invis").map((otherCard) => {
-      otherCard.style.display = "none";
-    });
-  });
+document.getElementById("hider").addEventListener("click", () => {
+  document.querySelector(".content").style.display = "none";
+  document.querySelector(".card-invis").style.display = "block";
 });
+
+document.querySelector(".invis").addEventListener("click", () => {
+  document.querySelector(".content").style.display = "block";
+  document.querySelector(".card-invis").style.display = "none";
+});
+
 async function fetchContacts() {
   try {
     let response = await fetch(
@@ -166,7 +163,6 @@ async function fetchContacts() {
 function renderContacts(contacts) {
   let wrapper = document.querySelector(".wrapper");
   wrapper.innerHTML = "";
-
   contacts.map((contact) => {
     let card = document.createElement("div");
     card.classList.add("card");
@@ -181,13 +177,32 @@ function renderContacts(contacts) {
         <button class="delete">Delete</button>
       </div>
     `;
-
     card.querySelector(".delete").addEventListener("click", () => {
       deleteContact(contact.id);
     });
-
+    card.querySelector(".edit").addEventListener("click", () => {
+      enterEdit(contact);
+    });
     wrapper.append(card);
   });
+}
+
+function enterEdit(contact) {
+  inp1.value = contact.firstName;
+  inp2.value = contact.number;
+  btn1.textContent = "Update Contact";
+  btn1.addEventListener("click", (e) => {
+    e.preventDefault();
+    editContact(contact.id, inp1.value, inp2.value);
+    resetForm();
+  });
+}
+
+function resetForm() {
+  inp1.value = "";
+  inp2.value = "";
+  btn1.textContent = "Add Contact";
+  btn1.style.backgroundColor = "#d55a5a";
 }
 
 async function postContact(firstName, number) {
@@ -218,6 +233,29 @@ async function postContact(firstName, number) {
   }
 }
 
+async function editContact(id, name, number) {
+  try {
+    const res = await fetch(
+      `https://68297b406075e87073a695a6.mockapi.io/api/contact/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: name,
+          number: number,
+        }),
+      }
+    );
+    showNotification("Contact updated successfully", "success");
+    fetchContacts();
+  } catch (error) {
+    console.error(error);
+    showNotification("Error updating contact", "error");
+  }
+}
+
 async function deleteContact(id) {
   try {
     let response = await fetch(
@@ -238,12 +276,13 @@ async function deleteContact(id) {
     showNotification("Error deleting contact", "error");
   }
 }
+
 document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   await postContact(inp1.value, inp2.value);
-  inp1.value = "";
-  inp2.value = "";
+  resetForm();
 });
+
 document.getElementById("search").addEventListener("input", (e) => {
   let searchTerm = e.target.value.toLowerCase();
   let cards = document.querySelectorAll(".card");
@@ -259,37 +298,39 @@ document.getElementById("search").addEventListener("input", (e) => {
     }
   });
 });
-document.getElementById("dropdownSelect").addEventListener("change", (e) => {
-  let sortValue = e.target.value;
-  try {
-    let response = fetch(
-      "https://68297b406075e87073a695a6.mockapi.io/api/contact"
-    );
-    let contacts = response.json();
 
-    if (sortValue === "az") {
-      contacts.sort((a, b) => a.firstName.localeCompare(b.firstName));
-    } else if (sortValue === "za") {
-      contacts.sort((a, b) => b.firstName.localeCompare(a.firstName));
+document
+  .getElementById("dropdownSelect")
+  .addEventListener("change", async (e) => {
+    let sortValue = e.target.value;
+    try {
+      let response = await fetch(
+        "https://68297b406075e87073a695a6.mockapi.io/api/contact"
+      );
+      let contacts = await response.json();
+      if (sortValue === "az") {
+        contacts.sort((a, b) => a.firstName.localeCompare(b.firstName));
+      } else if (sortValue === "za") {
+        contacts.sort((a, b) => b.firstName.localeCompare(a.firstName));
+      }
+      renderContacts(contacts);
+    } catch (error) {
+      console.error(error);
+      showNotification("Error sorting contacts", "error");
     }
+  });
 
-    renderContacts(contacts);
-  } catch (error) {
-    console.error("Error sorting contacts:", error);
-    showNotification("Error sorting contacts", "error");
-  }
-});
 function showNotification(message, type) {
   const notyf = new Notyf({
     duration: 3000,
     ripple: true,
     position: { x: "right", y: "top" },
   });
-
   if (type === "success") {
     notyf.success(message);
   } else {
     notyf.error(message);
   }
 }
+
 fetchContacts();
