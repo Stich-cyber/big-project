@@ -74,7 +74,6 @@ class Particle {
     this.draw();
   }
 }
-
 function animate() {
   if (!effectsEnabled) {
     animationRunning = false;
@@ -91,11 +90,9 @@ function animate() {
   }
   requestAnimationFrame(animate);
 }
-
 function toggle() {
   effectsEnabled = !effectsEnabled;
   let offOnButton = document.getElementById("off-on");
-
   if (effectsEnabled) {
     offOnButton.textContent = "Off effects";
     if (!animationRunning) {
@@ -109,7 +106,6 @@ function toggle() {
     particles = [];
   }
 }
-
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -118,9 +114,7 @@ window.addEventListener("resize", () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 });
-
 animate();
-
 let btn1 = document.querySelector(".btn1");
 let inp1 = document.querySelector(".inp1");
 let inp2 = document.querySelector(".inp2");
@@ -132,21 +126,17 @@ function changeBtn1() {
     btn1.style.backgroundColor = "#d55a5a";
   }
 }
-
 inp1.addEventListener("input", changeBtn1);
 inp2.addEventListener("input", changeBtn1);
 changeBtn1();
-
 document.getElementById("hider").addEventListener("click", () => {
   document.querySelector(".content").style.display = "none";
   document.querySelector(".card-invis").style.display = "block";
 });
-
 document.querySelector(".invis").addEventListener("click", () => {
   document.querySelector(".content").style.display = "block";
   document.querySelector(".card-invis").style.display = "none";
 });
-
 async function fetchContacts() {
   try {
     let response = await fetch(
@@ -159,7 +149,6 @@ async function fetchContacts() {
     showNotification("Failed to load contacts", "error");
   }
 }
-
 function renderContacts(contacts) {
   let wrapper = document.querySelector(".wrapper");
   wrapper.innerHTML = "";
@@ -186,7 +175,6 @@ function renderContacts(contacts) {
     wrapper.append(card);
   });
 }
-
 function enterEdit(contact) {
   inp1.value = contact.firstName;
   inp2.value = contact.number;
@@ -197,14 +185,12 @@ function enterEdit(contact) {
     resetForm();
   });
 }
-
 function resetForm() {
   inp1.value = "";
   inp2.value = "";
   btn1.textContent = "Add Contact";
   btn1.style.backgroundColor = "#d55a5a";
 }
-
 async function postContact(firstName, number) {
   try {
     let response = await fetch(
@@ -220,7 +206,6 @@ async function postContact(firstName, number) {
         }),
       }
     );
-
     if (response.ok) {
       showNotification("Contact added successfully", "success");
       fetchContacts();
@@ -232,7 +217,6 @@ async function postContact(firstName, number) {
     showNotification("Error adding contact", "error");
   }
 }
-
 async function editContact(id, name, number) {
   try {
     const res = await fetch(
@@ -255,7 +239,6 @@ async function editContact(id, name, number) {
     showNotification("Error updating contact", "error");
   }
 }
-
 async function deleteContact(id) {
   try {
     let response = await fetch(
@@ -264,7 +247,6 @@ async function deleteContact(id) {
         method: "DELETE",
       }
     );
-
     if (response.ok) {
       showNotification("Contact deleted successfully", "success");
       fetchContacts();
@@ -276,21 +258,17 @@ async function deleteContact(id) {
     showNotification("Error deleting contact", "error");
   }
 }
-
 document.querySelector("form").addEventListener("submit", async (e) => {
   e.preventDefault();
   await postContact(inp1.value, inp2.value);
   resetForm();
 });
-
 document.getElementById("search").addEventListener("input", (e) => {
   let searchTerm = e.target.value.toLowerCase();
   let cards = document.querySelectorAll(".card");
-
   cards.forEach((card) => {
     let name = card.querySelector("h2").textContent.toLowerCase();
     let number = card.querySelector("p").textContent.toLowerCase();
-
     if (name.includes(searchTerm) || number.includes(searchTerm)) {
       card.style.display = "flex";
     } else {
@@ -298,7 +276,6 @@ document.getElementById("search").addEventListener("input", (e) => {
     }
   });
 });
-
 document
   .getElementById("dropdownSelect")
   .addEventListener("change", async (e) => {
@@ -319,7 +296,6 @@ document
       showNotification("Error sorting contacts", "error");
     }
   });
-
 function showNotification(message, type) {
   const notyf = new Notyf({
     duration: 3000,
@@ -332,5 +308,4 @@ function showNotification(message, type) {
     notyf.error(message);
   }
 }
-
 fetchContacts();

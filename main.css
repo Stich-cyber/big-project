@@ -341,3 +341,8 @@ select {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+.menu-text {
+  text-align: center;
+  color: white;
+  margin-top: 10px;
+}
