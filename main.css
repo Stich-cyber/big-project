@@ -344,5 +344,6 @@ select {
 .menu-text {
   text-align: center;
   color: white;
-  margin-top: 10px;
+  margin-top: 30px;
+  font-size: 20px;
 }
